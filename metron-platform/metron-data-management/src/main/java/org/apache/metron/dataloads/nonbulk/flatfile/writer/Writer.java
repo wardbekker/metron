@@ -15,33 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.metron.dataloads.nonbulk.flatfile.importer;
+package org.apache.metron.dataloads.nonbulk.flatfile.writer;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.metron.common.utils.SerDeUtils;
+
+import java.io.IOException;
 import java.util.Optional;
 
-public enum ImportStrategy {
-  LOCAL(new LocalImporter()),
-  MR(MapReduceImporter.INSTANCE)
-  ;
-  private Importer importer;
-
-  ImportStrategy(Importer importer) {
-    this.importer = importer;
-  }
-
-  public Importer getImporter() {
-    return importer;
-  }
-
-  public static Optional<ImportStrategy> getStrategy(String strategyName) {
-    if(strategyName == null) {
-      return Optional.empty();
+public interface Writer {
+  void validate(Optional<String> output, Configuration hadoopConfig);
+  default void write(Object obj, Optional<String> output, Configuration hadoopConfig) throws IOException {
+    if(obj != null) {
+      write(SerDeUtils.toBytes(obj), output, hadoopConfig);
     }
-    for(ImportStrategy strategy : values()) {
-      if(strategy.name().equalsIgnoreCase(strategyName.trim())) {
-        return Optional.of(strategy);
-      }
-    }
-    return Optional.empty();
   }
+  void write(byte[] obj, Optional<String> output, Configuration hadoopConfig) throws IOException;
 }

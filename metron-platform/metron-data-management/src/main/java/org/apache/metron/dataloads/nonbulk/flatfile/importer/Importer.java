@@ -29,6 +29,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
 
-public interface Importer {
-  void importData(EnumMap<LoadOptions, Optional<Object>> config, ExtractorHandler handler , final Configuration hadoopConfig) throws IOException;
+public interface Importer<OPTIONS_T extends Enum<OPTIONS_T>> {
+  void importData(EnumMap<OPTIONS_T, Optional<Object>> config, ExtractorHandler handler , final Configuration hadoopConfig) throws IOException;
 }
