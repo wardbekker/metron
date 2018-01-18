@@ -303,7 +303,7 @@ We'll want to put the template back into Elasticsearch:
 curl -XPUT "http://${ELASTICSEARCH}:9200/_template/${SENSOR}_index" -d @${SENSOR}.template
 ```
 
-To update existing indexes, update Elasticsearch mappings with the new field for each sensor. 
+To update existing indexes, update Elasticsearch mappings with the new field for each sensor.
 
 ```
 curl -XPUT "http://${ELASTICSEARCH}:9200/${SENSOR}_index*/_mapping/${SENSOR}_doc" -d '
@@ -322,7 +322,7 @@ rm ${SENSOR}.template
 
 The stock set of Elasticsearch templates for bro, snort, yaf, error index and meta index are installed automatically during the first time install and startup of Metron Indexing service.
 
-It is possible that Elasticsearch service is not available when the Metron Indexing Service startup, in that case the Elasticsearch template will not be installed. 
+It is possible that Elasticsearch service is not available when the Metron Indexing Service startup, in that case the Elasticsearch template will not be installed.
 
 For such a scenario, an Admin can have the template installed in two ways:
 

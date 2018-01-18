@@ -51,12 +51,12 @@ sources to this primitive key (type, indicator) and value to be placed in HBase.
 In the case of threat intel, a hit on the threat intel table will result
 in:
 * The `is_alert` field being set to `true` in the index
-* A field named `threatintels.hbaseThreatIntel.$field.$threatintel_type` is set to `alert` 
-   * `$field` is the field in the original document that was a match (e.g. `src_ip_addr`) 
+* A field named `threatintels.hbaseThreatIntel.$field.$threatintel_type` is set to `alert`
+   * `$field` is the field in the original document that was a match (e.g. `src_ip_addr`)
    * `$threatintel_type` is the type of threat intel imported (defined in the Extractor configuration below).
 
 In the case of simple hbase enrichment, a hit on the enrichments table
-will result in the following new field for each key in the value:`enrichments.hbaseEnrichment.$field.$enrichment_type.$key` 
+will result in the following new field for each key in the value:`enrichments.hbaseEnrichment.$field.$enrichment_type.$key`
 * `$field` is the field in the original document that was a match (e.g.  `src_ip_addr`)
 * `$enrichment_type` is the type of enrichment imported (defined in the Extractor configuration below).
 * `$key` is a key in the JSON map associated with the row in HBase.
@@ -107,7 +107,7 @@ describes how to process a CSV file.
 }
 ```
 
-In this example, we have instructed the extractor of the schema (i.e. the columns field), 
+In this example, we have instructed the extractor of the schema (i.e. the columns field),
 two columns at the first and third position.  We have indicated that the `ip` column is the indicator type
 and that the enrichment type is named `malicious_ip`.  We have also indicated that the extractor to use is the CSV Extractor.
 The other option is the STIX extractor or a fully qualified classname for your own extractor.
@@ -246,7 +246,7 @@ The resulting value data would look like the following:
 
 In order to automatically add new enrichment and threat intel types to existing, running enrichment topologies, you will
 need to add new fields and new types to the zookeeper configuration.  A convenience parameter has been made to assist in this
-when doing an import.  Namely, you can specify the enrichment configs and how they associate with the fields of the 
+when doing an import.  Namely, you can specify the enrichment configs and how they associate with the fields of the
 documents flowing through the enrichment topology.
 
 Consider the following Enrichment Configuration JSON.  This one is for a threat intelligence type:
