@@ -15,7 +15,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-
 # Problem Statement
 
 [Typosquatting](https://en.wikipedia.org/wiki/Typosquatting) is a form of cybersquatting which relies on
@@ -326,6 +325,107 @@ As you can see, following the pattern of enrichments the following are done:
 
 Push the configs via `$METRON_HOME/bin/zk_load_configs.sh -m PUSH -i $METRON_HOME/config/zookeeper -z $ZOOKEEPER`
 
+## Setup Indices
+
+We have to adjust the mappings for the indices we just created to add
+the `alert` nested property and ensure each of our properties gets the
+right type.  One does not want to rely entirely on elasticsearch to
+guess the right types.  We will do that by specifying a template: 
+```
+curl -XPOST "http://$ES_HOST/_template/squid_index" -d '{
+          "template": "squid_index*",
+          "mappings": {
+             "squid_doc": {
+               "dynamic_templates": [
+                 {
+                   "timestamps": {
+                     "match": "*:ts",
+                     "match_mapping_type": "*",
+                     "mapping": {
+                     "type": "date",
+                     "format": "epoch_millis"
+                     }
+                                 }
+                 },
+                 {
+                   "threat_triage_score": {
+                     "mapping": {
+                       "type": "float"
+                     },
+                     "match": "threat:triage:*score",
+                     "match_mapping_type": "*"
+                   }
+                 },
+                 {
+                   "threat_triage_reason": {
+                     "mapping": {
+                       "type": "text",
+                       "fielddata": "true"
+                     },
+                     "match": "threat:triage:rules:*:reason",
+                     "match_mapping_type": "*"
+                   }
+                 }
+               ],
+               "properties" : {
+                 "action" : {
+                   "type" : "text","fielddata" : true
+                 },
+                 "bytes" : {
+                   "type" : "long"
+                 },
+                 "code" : {
+                   "type" : "long"
+                 },
+                 "domain_without_subdomains" : {
+                   "type" : "text","fielddata" : true
+                 },
+                 "elapsed" : {
+                   "type" : "long"
+                 },
+                 "full_hostname" : {
+                   "type" : "text","fielddata" : true
+                 },
+                 "guid" : {
+                   "type" : "keyword"
+                 },
+                 "ip_dst_addr" : {
+                   "type" : "ip"
+                 },
+                 "ip_src_addr" : {
+                   "type" : "ip"
+                 },
+                 "is_alert" : {
+                   "type" : "text","fielddata" : true
+                 },
+                 "is_potential_typosquat" : {
+                   "type" : "boolean"
+                 },
+                 "method" : {
+                   "type" : "text","fielddata" : true
+                 },
+                 "original_text" : {
+                   "type" : "text","fielddata" : true
+                 },
+                 "source:type" : {
+                   "type" : "keyword"
+                 },
+                 "timestamp" : {
+                   "type" : "date",
+                   "format": "epoch_millis"
+                 },
+                 "url" : {
+                   "type" : "text","fielddata" : true
+                 },
+                 "alert" : {
+                   "type" : "nested"
+                 }
+              }
+           }
+   }
+}'
+```
+
 ## Generate Sample Data
 
 We can now use `squidclient` to visit a regular domain and typosquatted domain and send the data to kafka:
@@ -337,107 +437,8 @@ cat /var/log/squid/access.log | /usr/hdp/current/kafka-broker/bin/kafka-console-
 
 ## Investigate via the Alerts UI
 
-We should now have data in our elasticsearch indices, so let's investigate via the alerts UI.   Before we do,
-we have to adjust the mappings for the indices we just created to add the `alert` nested property.  You can
-do that via the following:
-```
-curl -XPUT "http://$ES_HOST/squid*/_mapping/squid_doc" -d '{
-        "properties" : {
-          "action" : {
-            "type" : "string"
-          },
-          "adapter:stellaradapter:begin:ts" : {
-            "type" : "string"
-          },
-          "adapter:stellaradapter:end:ts" : {
-            "type" : "string"
-          },
-          "bytes" : {
-            "type" : "long"
-          },
-          "code" : {
-            "type" : "long"
-          },
-          "domain_without_subdomains" : {
-            "type" : "string"
-          },
-          "elapsed" : {
-            "type" : "long"
-          },
-          "enrichmentjoinbolt:joiner:ts" : {
-            "type" : "string"
-          },
-          "enrichmentsplitterbolt:splitter:begin:ts" : {
-            "type" : "string"
-          },
-          "enrichmentsplitterbolt:splitter:end:ts" : {
-            "type" : "string"
-          },
-          "full_hostname" : {
-            "type" : "string"
-          },
-          "guid" : {
-            "type" : "string"
-          },
-          "ip_dst_addr" : {
-            "type" : "string"
-          },
-          "ip_src_addr" : {
-            "type" : "string"
-          },
-          "is_alert" : {
-            "type" : "string"
-          },
-          "is_potential_typosquat" : {
-            "type" : "boolean"
-          },
-          "method" : {
-            "type" : "string"
-          },
-          "original_string" : {
-            "type" : "string"
-          },
-          "source:type" : {
-            "type" : "string"
-          },
-          "threat:triage:rules:0:comment" : {
-            "type" : "string"
-          },
-          "threat:triage:rules:0:name" : {
-            "type" : "string"
-          },
-          "threat:triage:rules:0:reason" : {
-            "type" : "string"
-          },
-          "threat:triage:rules:0:score" : {
-            "type" : "long"
-          },
-          "threat:triage:score" : {
-            "type" : "double"
-          },
-          "threatinteljoinbolt:joiner:ts" : {
-            "type" : "string"
-          },
-          "threatintelsplitterbolt:splitter:begin:ts" : {
-            "type" : "string"
-          },
-          "threatintelsplitterbolt:splitter:end:ts" : {
-            "type" : "string"
-          },
-          "timestamp" : {
-            "type" : "long"
-          },
-          "url" : {
-            "type" : "string"
-          },
-          "alert" : {
-            "type" : "nested"
-          }
-        }
-}'
-```
-
-Now we can visit the Alerts UI (find the link from Ambari if not on full-dev.  If on full-dev, go 
+We should now have data in our elasticsearch indices, so let's investigate via the alerts UI.   
+We can visit the Alerts UI (find the link from Ambari if not on full-dev.  If on full-dev, go 
 [here](http://node1:4201/alerts-list).
 
 From there you should see the following data from squid with one as an alert and the other not
