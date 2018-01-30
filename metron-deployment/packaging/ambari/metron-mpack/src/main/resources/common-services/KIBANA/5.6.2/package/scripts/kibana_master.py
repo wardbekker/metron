@@ -19,9 +19,11 @@ limitations under the License.
 import errno
 import os
 
+from ambari_commons.os_check import OSCheck
 from ambari_commons.os_family_impl import OsFamilyFuncImpl, OsFamilyImpl
 from resource_management.core.exceptions import ExecutionFailed
 from resource_management.core.exceptions import ComponentIsNotRunning
+
 from resource_management.core.logger import Logger
 from resource_management.core.resources.system import Directory
 from resource_management.core.resources.system import Execute
@@ -30,6 +32,7 @@ from resource_management.core.source import InlineTemplate
 from resource_management.libraries.functions.format import format as ambari_format
 from resource_management.libraries.script import Script
 from resource_management.libraries.functions.get_user_call_output import get_user_call_output
+
 from common import service_check
 
 class Kibana(Script):
@@ -47,7 +50,6 @@ class Kibana(Script):
 
         directories = [params.log_dir, params.pid_dir, params.conf_dir]
         Directory(directories,
-                  create_parents=True,
                   mode=0755,
                   owner=params.kibana_user,
                   group=params.kibana_user

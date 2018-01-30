@@ -17,6 +17,7 @@ limitations under the License.
 
 """
 
+from resource_management.core import shell
 from resource_management.core.resources.system import Execute
 from resource_management.libraries.script import Script
 from resource_management.core.logger import Logger
