@@ -72,7 +72,7 @@ def build_global_config_patch(params, patch_file):
     },
     {
         "op": "add",
-        "path": "/es.xpackuser",
+        "path": "/es.xpack.user",
         "value": "{{es_xpackuser}}"
     },
     {
