@@ -37,6 +37,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.metron.common.configuration.writer.WriterConfiguration;
 import org.apache.metron.netty.utils.NettyRuntimeWrapper;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
@@ -106,14 +107,14 @@ public class ElasticsearchUtils {
     return parts[0];
   }
 
-  public static PreBuiltXPackTransportClient getClient(Map<String, Object> globalConfiguration, Map<String, String> optionalSettings) {
+  public static TransportClient getClient(Map<String, Object> globalConfiguration, Map<String, String> optionalSettings) {
     Settings.Builder settingsBuilder = Settings.builder();
     settingsBuilder.put("cluster.name", globalConfiguration.get("es.clustername"));
     settingsBuilder.put("client.transport.ping_timeout","500s");
     settingsBuilder.put("transport.type", "security4");
-    String xpackuser = (String) globalConfiguration.get("es.xpackuser");
-    if (xpackuser != null) {
-      settingsBuilder.put("xpack.security.user", xpackuser);
+    Object xPackUser = globalConfiguration.get("es.xpackuser");
+    if (xPackUser != null) {
+      settingsBuilder.put("xpack.security.user", xPackUser);
     }
     if (optionalSettings != null) {
       settingsBuilder.put(optionalSettings);

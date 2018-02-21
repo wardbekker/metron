@@ -44,6 +44,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.support.replication.ReplicationResponse.ShardInfo;
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.index.mapper.LegacyIpFieldMapper;
@@ -64,7 +65,6 @@ import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
-import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +101,7 @@ public class ElasticsearchDao implements IndexDao {
   /**
    * The Elasticsearch client.
    */
-  private transient PreBuiltXPackTransportClient client;
+  private transient TransportClient client;
 
   /**
    * Retrieves column metadata about search indices.
@@ -115,7 +115,7 @@ public class ElasticsearchDao implements IndexDao {
 
   private AccessConfig accessConfig;
 
-  protected ElasticsearchDao(PreBuiltXPackTransportClient client,
+  protected ElasticsearchDao(TransportClient client,
                              ColumnMetadataDao columnMetadataDao,
                              ElasticsearchRequestSubmitter requestSubmitter,
                              AccessConfig config) {
@@ -697,7 +697,7 @@ public class ElasticsearchDao implements IndexDao {
     return String.format("%s_count", field);
   }
 
-  public PreBuiltXPackTransportClient getClient() {
+  public TransportClient getClient() {
     return client;
   }
 
@@ -709,7 +709,7 @@ public class ElasticsearchDao implements IndexDao {
     return String.format("%s_score", field);
   }
 
-  public ElasticsearchDao client(PreBuiltXPackTransportClient client) {
+  public ElasticsearchDao client(TransportClient client) {
     this.client = client;
     return this;
   }
