@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.metron.common.Constants;
 import org.apache.metron.common.configuration.writer.WriterConfiguration;
-import org.apache.metron.common.interfaces.FieldNameConverter;
 import org.apache.metron.common.writer.BulkMessageWriter;
 import org.apache.metron.common.writer.BulkWriterResponse;
 import org.apache.metron.elasticsearch.utils.ElasticsearchUtils;
@@ -37,15 +36,11 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.transport.TransportClient;
 import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ElasticsearchWriter implements BulkMessageWriter<JSONObject>, Serializable {
 
   private transient TransportClient client;
   private SimpleDateFormat dateFormat;
-  private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchWriter.class);
-  private FieldNameConverter fieldNameConverter = new ElasticsearchFieldNameConverter();
 
   @Override
   public void init(Map stormConf, TopologyContext topologyContext, WriterConfiguration configurations) {
@@ -60,13 +55,7 @@ public class ElasticsearchWriter implements BulkMessageWriter<JSONObject>, Seria
     final String indexPostfix = dateFormat.format(new Date());
     BulkRequestBuilder bulkRequest = client.prepareBulk();
 
-    for(JSONObject message: messages) {
-
-      JSONObject esDoc = new JSONObject();
-      for(Object k : message.keySet()){
-        deDot(k.toString(), message, esDoc);
-      }
-
+    for(JSONObject esDoc: messages) {
       String indexName = ElasticsearchUtils.getIndexName(sensorType, indexPostfix, configurations);
       IndexRequestBuilder indexRequestBuilder = client.prepareIndex(indexName, sensorType + "_doc");
       indexRequestBuilder = indexRequestBuilder.setSource(esDoc.toJSONString());
@@ -121,22 +110,8 @@ public class ElasticsearchWriter implements BulkMessageWriter<JSONObject>, Seria
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     client.close();
-  }
-
-  //JSONObject doesn't expose map generics
-  @SuppressWarnings("unchecked")
-  private void deDot(String field, JSONObject origMessage, JSONObject message){
-
-    if(field.contains(".")){
-
-      LOG.debug("Dotted field: {}", field);
-
-    }
-    String newkey = fieldNameConverter.convert(field);
-    message.put(newkey,origMessage.get(field));
-
   }
 
 }
