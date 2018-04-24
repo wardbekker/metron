@@ -165,7 +165,7 @@ public class ElasticsearchUtils {
     if (esSettings.containsKey("es.xpack.password.file")) {
       // Note, xpack.security.user is user AND password, delimited by colon ":"
       String xpackUsername = esSettings.get("es.xpack.username");
-      String xpackPassword = getPasswordFromFile(esSettings.get("es.xpack.password.file"));
+      String xpackPassword = "metron";
       settingsBuilder.put("xpack.security.user", xpackUsername + ":" + xpackPassword);
     }
   }

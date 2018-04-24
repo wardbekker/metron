@@ -128,15 +128,7 @@ public class ElasticsearchWriter implements BulkMessageWriter<JSONObject>, Seria
   //JSONObject doesn't expose map generics
   @SuppressWarnings("unchecked")
   private void deDot(String field, JSONObject origMessage, JSONObject message){
-
-    if(field.contains(".")){
-
-      LOG.debug("Dotted field: {}", field);
-
-    }
-    String newkey = fieldNameConverter.convert(field);
-    message.put(newkey,origMessage.get(field));
-
+    message.put(field,origMessage.get(field));
   }
 
 }
